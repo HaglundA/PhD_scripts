@@ -1,0 +1,36 @@
+
+match_gtex=function(treeqtlout,gtex){
+
+
+  treeqtlout<-read.table(treeqtlout,head=T)
+  treeqtlout$SNP<-as.character(treeqtlout$SNP)
+
+
+  gtex<-read.table(gtex,head=T,fill=T)
+  gtex$rs_id_dbSNP151_GRCh38p7<-as.character( gtex$rs_id_dbSNP151_GRCh38p7)
+
+
+  commonsnps<-intersect(gtex$rs_id_dbSNP151_GRCh38p7,treeqtlout$SNP)
+
+  gtex<-gtex[match(commonsnps,gtex$rs_id_dbSNP151_GRCh38p7),]
+  treeqtlout<-treeqtlout[match(commonsnps,treeqtlout$SNP),]
+
+  tmp<-data.frame(gtex_snp=gtex$rs_id_dbSNP151_GRCh38p7,
+    gtex_gene=gtex$gene_name,
+    gtex_pval=gtex$pval_nominal,
+    treeqtlsnp=treeqtlout$SNP,
+    treeqtlgene=treeqtlout$gene,
+    treeqtl_BBFDR=treeqtlout$BBFDR)
+
+  tmp$gtex_gene<-as.character(tmp$gtex_gene)
+  tmp$treeqtlgene<-as.character(tmp$treeqtlgene)
+
+  tmp<-tmp[which(tmp$gtex_gene==tmp$treeqtlgene),]
+
+  eqtls<-nrow(tmp)
+
+  message("A total of ",eqtls," cis-EQTLs intersect between TreeQTL output and GTEx.")
+
+  return(tmp)
+
+}
